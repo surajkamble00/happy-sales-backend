@@ -39,4 +39,12 @@ public class PurchaseService {
         purchase.setPaymentStatus(status);
         return purchaseRepository.save(purchase);
     }
+
+    @Transactional
+    public void deletePurchase(Long id) {
+        if (!purchaseRepository.existsById(id)) {
+            throw new EntityNotFoundException("Purchase record not found with id: " + id);
+        }
+        purchaseRepository.deleteById(id);
+    }
 }

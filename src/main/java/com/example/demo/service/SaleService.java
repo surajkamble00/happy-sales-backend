@@ -39,4 +39,10 @@ public class SaleService {
         sale.setPaymentStatus(status);
         return saleRepository.save(sale);
     }
+
+    @Transactional
+    public void deleteSale(String invoiceNo) {
+        Sale sale = getSaleByInvoiceNo(invoiceNo);
+        saleRepository.delete(sale);
+    }
 }
