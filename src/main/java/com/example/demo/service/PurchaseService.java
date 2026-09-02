@@ -1,5 +1,6 @@
 package com.example.demo.service;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -30,6 +31,33 @@ public class PurchaseService {
     @Transactional
     public Purchase createPurchase(Purchase purchase) {
         return purchaseRepository.save(purchase);
+    }
+
+    @Transactional
+    public Purchase updatePurchase(Long id, Purchase updatedData) {
+        Purchase existing = getPurchaseById(id);
+
+        existing.setFarmerName(updatedData.getFarmerName());
+        existing.setCommodity(updatedData.getCommodity());
+        existing.setRawQuantityKg(updatedData.getRawQuantityKg());
+        existing.setRatePerKg(updatedData.getRatePerKg());
+        existing.setTransportationCost(updatedData.getTransportationCost());
+        existing.setPurchaseDate(updatedData.getPurchaseDate());
+
+        if (updatedData.getPaymentStatus() != null) {
+            existing.setPaymentStatus(updatedData.getPaymentStatus());
+        }
+
+        // Recalculate total landed cost = (rawQuantityKg * ratePerKg) + transportationCost
+        if (updatedData.getRawQuantityKg() != null && updatedData.getRatePerKg() != null) {
+            BigDecimal rawTotal = updatedData.getRatePerKg().multiply(BigDecimal.valueOf(updatedData.getRawQuantityKg()));
+            BigDecimal transport = updatedData.getTransportationCost() != null ? updatedData.getTransportationCost() : BigDecimal.ZERO;
+            existing.setTotalLandedCost(rawTotal.add(transport));
+        } else if (updatedData.getTotalLandedCost() != null) {
+            existing.setTotalLandedCost(updatedData.getTotalLandedCost());
+        }
+
+        return purchaseRepository.save(existing);
     }
 
     @Transactional

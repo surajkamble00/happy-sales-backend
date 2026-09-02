@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -46,6 +47,13 @@ public class SaleController {
     @PostMapping
     public ResponseEntity<Sale> createSale(@RequestBody Sale sale) {
         return ResponseEntity.ok(saleService.createSale(sale));
+    }
+
+    @PutMapping("/{invoiceNo}")
+    public ResponseEntity<Sale> updateSale(
+            @PathVariable String invoiceNo,
+            @RequestBody Sale sale) {
+        return ResponseEntity.ok(saleService.updateSale(invoiceNo, sale));
     }
 
     @PatchMapping("/{invoiceNo}/payment-status")

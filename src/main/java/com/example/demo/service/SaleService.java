@@ -1,5 +1,6 @@
 package com.example.demo.service;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -30,6 +31,31 @@ public class SaleService {
     @Transactional
     public Sale createSale(Sale sale) {
         return saleRepository.save(sale);
+    }
+
+    @Transactional
+    public Sale updateSale(String invoiceNo, Sale updatedData) {
+        Sale existing = getSaleByInvoiceNo(invoiceNo);
+
+        existing.setClientName(updatedData.getClientName());
+        existing.setClientContact(updatedData.getClientContact());
+        existing.setQuantityKg(updatedData.getQuantityKg());
+        existing.setSellingPricePerKg(updatedData.getSellingPricePerKg());
+        existing.setSaleDate(updatedData.getSaleDate());
+
+        if (updatedData.getPaymentStatus() != null) {
+            existing.setPaymentStatus(updatedData.getPaymentStatus());
+        }
+
+        // Recalculate total amount = quantityKg * sellingPricePerKg
+        if (updatedData.getQuantityKg() != null && updatedData.getSellingPricePerKg() != null) {
+            BigDecimal total = updatedData.getSellingPricePerKg().multiply(BigDecimal.valueOf(updatedData.getQuantityKg()));
+            existing.setTotalAmount(total);
+        } else if (updatedData.getTotalAmount() != null) {
+            existing.setTotalAmount(updatedData.getTotalAmount());
+        }
+
+        return saleRepository.save(existing);
     }
 
     @Transactional
