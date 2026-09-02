@@ -41,18 +41,33 @@ public class PurchaseService {
         existing.setCommodity(updatedData.getCommodity());
         existing.setRawQuantityKg(updatedData.getRawQuantityKg());
         existing.setRatePerKg(updatedData.getRatePerKg());
-        existing.setTransportationCost(updatedData.getTransportationCost());
+        existing.setTransportationCost(updatedData.getTransportationCost() != null ? updatedData.getTransportationCost() : BigDecimal.ZERO);
+        existing.setProcessingWastageKg(updatedData.getProcessingWastageKg() != null ? updatedData.getProcessingWastageKg() : 0.0);
+        existing.setLaborCost(updatedData.getLaborCost() != null ? updatedData.getLaborCost() : BigDecimal.ZERO);
+        existing.setBagCost(updatedData.getBagCost() != null ? updatedData.getBagCost() : BigDecimal.ZERO);
+        existing.setFarmerProfit(updatedData.getFarmerProfit() != null ? updatedData.getFarmerProfit() : BigDecimal.ZERO);
+        existing.setTaxes(updatedData.getTaxes() != null ? updatedData.getTaxes() : BigDecimal.ZERO);
         existing.setPurchaseDate(updatedData.getPurchaseDate());
 
         if (updatedData.getPaymentStatus() != null) {
             existing.setPaymentStatus(updatedData.getPaymentStatus());
         }
 
-        // Recalculate total landed cost = (rawQuantityKg * ratePerKg) + transportationCost
+        // Recalculate total landed cost = (usableQty * ratePerKg) + all auxiliary expenses
         if (updatedData.getRawQuantityKg() != null && updatedData.getRatePerKg() != null) {
-            BigDecimal rawTotal = updatedData.getRatePerKg().multiply(BigDecimal.valueOf(updatedData.getRawQuantityKg()));
-            BigDecimal transport = updatedData.getTransportationCost() != null ? updatedData.getTransportationCost() : BigDecimal.ZERO;
-            existing.setTotalLandedCost(rawTotal.add(transport));
+            double usableQty = updatedData.getRawQuantityKg();
+            if (updatedData.getProcessingWastageKg() != null && updatedData.getProcessingWastageKg() > 0) {
+                usableQty = Math.max(0, usableQty - updatedData.getProcessingWastageKg());
+            }
+
+            BigDecimal materialCost = updatedData.getRatePerKg().multiply(BigDecimal.valueOf(usableQty));
+            BigDecimal totalExpenses = existing.getTransportationCost()
+                    .add(existing.getLaborCost())
+                    .add(existing.getBagCost())
+                    .add(existing.getFarmerProfit())
+                    .add(existing.getTaxes());
+
+            existing.setTotalLandedCost(materialCost.add(totalExpenses));
         } else if (updatedData.getTotalLandedCost() != null) {
             existing.setTotalLandedCost(updatedData.getTotalLandedCost());
         }

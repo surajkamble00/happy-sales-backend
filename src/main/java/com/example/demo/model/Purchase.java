@@ -45,6 +45,16 @@ public class Purchase {
     @Column(nullable = false)
     private BigDecimal transportationCost;
 
+    private Double processingWastageKg;
+
+    private BigDecimal laborCost;
+
+    private BigDecimal bagCost;
+
+    private BigDecimal farmerProfit;
+
+    private BigDecimal taxes;
+
     @Column(nullable = false)
     private BigDecimal totalLandedCost;
 
